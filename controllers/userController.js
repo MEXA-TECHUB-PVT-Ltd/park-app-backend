@@ -20,6 +20,82 @@ exports.createUser=(req,res)=>{
   }
 };
 
+exports.getAllUser=async (req,res)=>{
+
+        const userDetails=await User.aggregate([
+          
+          {
+              $lookup:
+              {
+                  from: "savedroutes",
+                  localField: "_id",
+                  foreignField: "userId",
+                  as: "User saved routes"
+              }
+    
+          },
+          {
+            $lookup:
+            {
+                from: "findings",
+                localField: "_id",
+                foreignField: "userId",
+                as: "All User findings about Routes"
+            }
+    
+        },
+        {
+          $lookup:
+          {
+              from: "parkedcars",
+              localField: "_id",
+              foreignField: "userId",
+              as: "All Parkings of User"
+          }
+    
+      },
+        
+      ]);
+    
+        res.send({
+          message:"User Has fetched with his necessary details",
+          userDetails:userDetails,
+        })
+    
+  }
+
+
+  exports.getUserByToken= (req,res)=>{
+      const token = req.params.token;
+      userModel.findOne({token:token} , function(err,result){
+        try{
+          if(result){
+            res.json({
+              message : "User with this token is :",
+              result:result,
+              statusCode: 200,
+              
+            })
+          }
+          else{
+            res.json({
+              message: "could not found User with this token",
+              result:result,
+            })
+          }
+        }
+        catch(err){
+          res.json({
+            message: "Error occurred while fetching user ",
+            errorMessage: err.message,
+            statusCode:500
+          })
+        }
+      })
+  }
+
+
+
 exports.getUser=async (req,res)=>{
     const userId = req.params.userId;
     User.findOne({_id:userId}, async function(err,result){

@@ -1,0 +1,193 @@
+
+const locationModel= require("../models/locationsModel")
+const mongoose  = require("mongoose");
+
+
+
+
+exports.getLocations = (req,res) =>{
+
+    locationModel.find({}, (err , result)=>{
+        try{
+            res.json({
+                message: "All fetched locations are :",
+                data: result
+            })
+        }
+        catch(err){
+            res.json({
+                message: "Error in fetched location",
+                Error: err.message,
+                error: err
+            })
+        }
+
+    })
+}
+exports .getLocationByType = (req,res)=>{
+    const type= req.query.type
+
+    locationModel.find({type:type} , function(err,result){
+        try{
+            if(result){
+                res.json({
+                    message: "Locations with this types are fetched",
+                    statusCode: 200,
+                    result: result
+                })
+            }
+            else{
+                res.json({
+                    message: "could not fetched , record with this type may not exist",
+                    statusCode:404,
+                })
+            }
+        }
+        catch(err){
+            res.json({
+                message: "Error occurred while fetching location .",
+                Error:err,
+                errorMessage: err.message,
+            })
+        }
+    })
+}
+exports.createLocations= (req,res) => {
+
+    const type= req.body.type;
+    const images = req.body.images;
+    const title = req.body.title;
+    const description = req.body.description;
+    const distance = req.body.distance;
+    const avg_time = req.body.avg_time;
+
+
+    if(type!== null && typeof type !== "undefined"){
+
+        const newLocation= new locationModel({
+            _id:mongoose.Types.ObjectId(),
+             type: type,
+             images:images,
+             title:title,
+             description:description,
+             distance:distance,
+             avg_time:avg_time,
+             $set: {
+                "location.coordinates": [req.body.long, req.body.lat],
+              },
+    
+        })
+
+        newLocation.save(function(err, result){
+            try{
+                res.json({
+                    message:"location successfully saved",
+                    result:result,
+                    statusCode:201
+                })
+            }
+            catch(err){
+                res.json({
+                    message:"Error in saving location ",
+                    Error: err.message,
+                    error: err
+                })
+            }
+        })
+    }
+    else{
+        res.json({
+            message: "type may be null or undefined",
+        })
+    }
+
+    
+}
+
+exports.deleteLocation = ( req,res) =>{
+
+    const location_id = req.params.location_id ;
+    
+    if(location_id !==null && typeof location_id !=="undefined"){
+    locationModel.deleteOne({_id:location_id} , function(err , result){
+        try{
+            if(result.deletedCount > 0){
+                res.json({
+                    message:"deleted successfully",
+                    result:result,
+                    statusCode:200
+                })
+            }
+            else{
+                res.json({
+                    message: "could not delete location , location_id may be null or undefined"
+                })
+            }
+        }
+        catch(err){
+            res.json({
+                message: "Error occurred while deleting location",
+                statusCode:404,
+                Error:err,
+                errorMessage: err.message
+            })
+        }
+})
+}
+}
+
+
+exports.updateLocation = (req,res)=>{
+
+    const location_id = req.body.location_id;
+    const type= req.body.type;
+    const location = req.body.location;
+    const images = req.body.images;
+    const title = req.body.title;
+    const description = req.body.description;
+    const distance = req.body.distance;
+    const avg_time = req.body.avg_time;
+    
+
+    if(location_id){
+        locationModel.findOneAndUpdate ({_id: location_id}, 
+            {
+                type: type,
+                location: location,
+                images:images,
+                title:title,
+                description:description,
+                distance:distance,
+                avg_time:avg_time,
+            },
+            {
+                new: true,
+            }, function(err, result) {
+                try{
+                    if(result){
+                        res.json({
+                            message: "location updated successfully",
+                            result:result,
+                            statusCode:201
+                        })
+                    }
+                    else{
+                        res.json({
+                            message: "could not update location , location with this id may not exist",
+                            
+                        })
+                    }
+                }
+                catch(err){
+                    res.json({
+                        message: "Error updating location",
+                        errorMessage: err.message,
+                        statusCode:500
+                    })
+                }
+            })
+    }
+        else{
+        res.json("location_id may be null or undefined")
+       }
+}

@@ -59,7 +59,7 @@ exports.addContactDetails= async (req,res) => {
     }else if(data.length <=1 ){
           const id=data[0]._id;
           console.log(id)
-         contactModel.updateOne({_id:id},{contactNumber:contactNumber} , {new:true} , function(err,result){
+         contactModel.findOneAndUpdate({_id:id},{contactNumber:contactNumber} , {new:true} , function(err,result){
                     try{
                         if(result){
                             res.json({
