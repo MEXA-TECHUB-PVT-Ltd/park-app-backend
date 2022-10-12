@@ -5,9 +5,9 @@ const mongoose= require('mongoose');
 const parkedCarsSchema = new mongoose.Schema({
     _id : mongoose.Schema.Types.ObjectId,
     userId:mongoose.Schema.Types.ObjectId,
-    locationType: {
+    parking_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref : "locationType"
+      ref : "location"
     },
     isParked : {
       type:Boolean,
@@ -21,26 +21,17 @@ const parkedCarsSchema = new mongoose.Schema({
         type: Date,
         
       },
-      totalParkingTime:{
+    totalParkingTime:{
         type:String,
-      },
-      location: {
-        type: { 
-         type: String,
-         default: "Point"
-       },
-        coordinates: {
-          type: [Number], 
-         required: [true, "Coordinates are required"] 
-       } 
-     },
-      carPlateNumber: {
+    },
+      plateNumber: {
         type:String,
       }, 
-      section : String,
-      comment : String
+      lane_number : Number,
+      parking_details:String,
+      carColor: String,
     
 })
 
 parkedCarsSchema.index({location:"2dsphere"});
-module.exports = mongoose.model("parkedCar" , parkedCarsSchema);
+module.exports = mongoose.model("userParking" , parkedCarsSchema);

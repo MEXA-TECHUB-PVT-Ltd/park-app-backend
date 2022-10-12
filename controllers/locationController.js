@@ -60,6 +60,7 @@ exports.createLocations= (req,res) => {
     const description = req.body.description;
     const distance = req.body.distance;
     const avg_time = req.body.avg_time;
+    const location = req.body.location;
 
 
     if(type!== null && typeof type !== "undefined"){
@@ -72,9 +73,8 @@ exports.createLocations= (req,res) => {
              description:description,
              distance:distance,
              avg_time:avg_time,
-             $set: {
-                "location.coordinates": [req.body.long, req.body.lat],
-              },
+             location:location,
+            
     
         })
 
@@ -141,7 +141,6 @@ exports.updateLocation = (req,res)=>{
 
     const location_id = req.body.location_id;
     const type= req.body.type;
-    const location = req.body.location;
     const images = req.body.images;
     const title = req.body.title;
     const description = req.body.description;
@@ -153,12 +152,14 @@ exports.updateLocation = (req,res)=>{
         locationModel.findOneAndUpdate ({_id: location_id}, 
             {
                 type: type,
-                location: location,
                 images:images,
                 title:title,
                 description:description,
                 distance:distance,
                 avg_time:avg_time,
+                $set: {
+                    "location.coordinates": [req.body.long, req.body.lat],
+                  },
             },
             {
                 new: true,

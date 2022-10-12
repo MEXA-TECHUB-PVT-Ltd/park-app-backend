@@ -4,11 +4,9 @@ const parkedCarsModel= require("../models/parkedCarsModel")
 const mongoose  = require("mongoose");
 
 
-
-
 exports.getParkedCars = (req,res) =>{
 
-    parkedCarsModel.find({}).populate("locationType").
+    parkedCarsModel.find({}).populate("parking_id").
     exec(function(err, result){
         try{
             res.json({
@@ -29,7 +27,7 @@ exports.getParkedCars = (req,res) =>{
 
 exports.getOnlyParkedCars = (req,res) =>{
 
-    parkedCarsModel.find({isParked:true}).populate("locationType").
+    parkedCarsModel.find({isParked:true}).populate("parking_id").
     exec(function(err, result){
         try{
             res.json({
@@ -52,7 +50,7 @@ exports.getParkedCarsByUserId= (req,res) =>{
     const userId = req.params.userId
 
     if(userId !==null && typeof userId !=="undefined" ){
-        parkedCarsModel.find({userId:userId}).populate("locationType").
+        parkedCarsModel.find({userId:userId}).populate("parking_id").
         exec(function(err, result){
             try{
                 res.json({
@@ -80,27 +78,29 @@ exports.getParkedCarsByUserId= (req,res) =>{
 exports.parkCar= (req,res) => {
 
     const parkTime = req.body.parkTime;
-    const unParkTime = req.body.unParkTime;
-    const location = req.body.location;
-    const carPlateNumber = req.body.carPlateNumber;
-    const sectionNumber = req.body.sectionNumber;
-    const comment = req.body.comment;
+    const plateNumber = req.body.plateNumber;
+    const lane_number = req.body.lane_number;
+    const parkingDetails = req.body.parkDetails;
     const userId = req.body.userId;
-    const locationTypeId = req.body.locationTypeId;
-    const totalParkingTime = req.body.totalParkingTime;
+    const parking_id = req.body.parking_id;
+    const totalParkingTime= req.body.totalParkingTime;
+    const unParkTime = req.body.unParkTime;
+    const carColor = req.body.carColor;
+
     
 
-    if(carPlateNumber &&  parkTime && location !== null && typeof carPlateNumber && typeof parkTime && typeof location !=="undefined"){
+    if(parking_id){
         const park= new parkedCarsModel({
             _id:mongoose.Types.ObjectId(),
             userId:userId,
-            parkTime: parkTime,
-            location: location,
-            carPlateNumber: carPlateNumber,
-            sectionNumber: sectionNumber,
-            comment: comment,
-            locationType:locationTypeId,
-            totalParkingTime:totalParkingTime
+            parking_details:parkingDetails,
+            parking_id:parking_id,
+            parkTime:parkTime,
+            lane_number:lane_number,
+            totalParkingTime:totalParkingTime,
+            carColor:carColor,
+            unParkTime:unParkTime,
+            plateNumber:plateNumber,
     
         })
 
@@ -123,7 +123,7 @@ exports.parkCar= (req,res) => {
     }
     else{
         res.json({
-            message: "car plate Number , park Time or location may be null or undefined",
+            message: "parking id my be null or undefined",
         })
     }
 
@@ -131,7 +131,6 @@ exports.parkCar= (req,res) => {
 }
 
 exports.deleteParkings = ( req,res) =>{
-
     const parkingId = req.params.parkingId ;
     
     if(parkingId !==null && typeof parkingId !=="undefined"){
@@ -192,4 +191,59 @@ exports.unPark= (req,res)=>{
         else{
         res.json("parkingId  may be null or undefined")
        }
+}
+
+exports.updateParking = (req,res)=>{
+    const parkingId = req.body.parkingId;
+    const parkTime = req.body.parkTime;
+    const plateNumber = req.body.plateNumber;
+    const lane_number = req.body.lane_number;
+    const parkingDetails = req.body.parkDetails;
+    const userId = req.body.userId;
+    const parking_id = req.body.parking_id;
+    const totalParkingTime= req.body.totalParkingTime;
+    const unParkTime = req.body.unParkTime;
+    const carColor = req.body.carColor;
+
+    parkedCarsModel.findOneAndUpdate({_id:parkingId}
+        ,
+        {
+            userId:userId,
+            parking_details:parkingDetails,
+            parking_id:parking_id,
+            parkTime:parkTime,
+            lane_number:lane_number,
+            totalParkingTime:totalParkingTime,
+            carColor:carColor,
+            unParkTime:unParkTime,
+            plateNumber:plateNumber,
+        },
+        {
+            new: true
+        }, function(err,result){
+            try{
+                if(result){
+                    res.json({
+                        message: " parking has been updated successfully",
+                        statusCode: 200,
+                        result: result
+
+                    })
+                }
+                else{
+                    res.json({
+                        message: "Could not update parking ",
+                        statusCode: 404,
+                    })
+                }
+            }
+            catch(err){
+                res.json({
+                    message: "Error occurred while updating parking",
+                    Error:err,
+                    errorMessage: err.message,
+                })
+            }
+        }
+        )
 }
