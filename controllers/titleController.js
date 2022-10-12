@@ -1,5 +1,5 @@
 
-const titleModel= require("../models/titleModel")
+const titleModel= require("../models/TitleModel")
 const mongoose  = require("mongoose");
 
 
