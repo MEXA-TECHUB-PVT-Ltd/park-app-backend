@@ -40,6 +40,8 @@ app.use("/api/title" , require("./routes/TitleRoute"))
 app.use("/api/parkCapacity" , require("./routes/parkingCapacityRoute"))
 app.use("/api/admin" , require("./routes/adminRoute"))
 app.use("/api/forgetPassword" , require("./routes/userForgetRoute"))
+app.use("/api/reviews" , require("./routes/reviewsRoute"))
+
 
 
 

@@ -192,7 +192,7 @@ exports.unPark= (req,res)=>{
         res.json("parkingId  may be null or undefined")
        }
 }
-
+ 
 exports.updateParking = (req,res)=>{
     const parkingId = req.body.parkingId;
     const parkTime = req.body.parkTime;
