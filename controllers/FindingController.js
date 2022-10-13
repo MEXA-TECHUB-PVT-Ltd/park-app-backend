@@ -6,8 +6,7 @@ const mongoose  = require("mongoose");
 
 
 exports.getFindings = (req,res) =>{
-
-   FindingsModel.find({}).populate("routeId").
+   FindingsModel.find({}).populate("location_id").
    exec(function (err, foundResult) {
     if(!err){
         if(foundResult!==null && typeof foundResult !=="undefined"){
@@ -29,9 +28,55 @@ exports.getFindings = (req,res) =>{
 });
 }
 
+exports.getAllLocIfFindingsNotExist = (req,res)=>{
+    FindingsModel.find({ findings: { $exists: false } }).populate("location_id").
+   exec(function (err, foundResult) {
+    if(!err){
+        if(foundResult!==null && typeof foundResult !=="undefined"){
+            res.json({
+                message:"fetched Records if saved location have findings not exists",
+                result:foundResult
+            })
+        }else{
+            res.json({
+                message: "Result is null"
+            })
+        }
+    }else{
+        res.json({message: "Result is not found",
+                Error: err.message
+    })
+    }
+
+});  
+}
+
+exports.getAllLocIfFindingsNotExistByUserId= (req,res)=>{
+    const userId= req.params.userId;
+    FindingsModel.find({ findings: { $exists: false } , userId:userId }).populate("location_id").
+   exec(function (err, foundResult) {
+    if(!err){
+        if(foundResult!==null && typeof foundResult !=="undefined"){
+            res.json({
+                message:"fetched records of User if saved location have findings not exists",
+                result:foundResult
+            })
+        }else{
+            res.json({
+                message: "Result is null"
+            })
+        }
+    }else{
+        res.json({message: "Result is not found",
+                Error: err.message
+    })
+    }
+
+});  
+}
 exports.getFindingsByUserId = (req,res) =>{
     const userId = req.params.userId;
-    FindingsModel.find({userId:userId}).populate("routeId").
+    FindingsModel.find({userId:userId}).populate("location_id").
     exec(function (err, foundResult) {
         if(!err){
             if(foundResult!==null && typeof foundResult !=="undefined"){
@@ -53,47 +98,57 @@ exports.getFindingsByUserId = (req,res) =>{
  });
  }
 
-exports.addFindings= (req,res) => {
+exports.addFindings= async (req,res) => {
 
     const userId = req.body.userId;
-    const description = req.body.description;
-    const routeId= req.body.routeId;
+    const findings = req.body.findings;
+    const location_id= req.body.location_id;
     
+    if(location_id && userId) {
 
+        if(findings){
+            var newFindings = new FindingsModel({
+                _id:mongoose.Types.ObjectId(),
+                location_id:location_id,
+                userId:userId,
+                findings:findings,
+                savedStatus:true
+            })
 
-
-    if(userId && routeId !== null && typeof userId  && typeof routeId!== "undefined"){
-
-        const newRoute= new FindingsModel({
-            _id:mongoose.Types.ObjectId(),
-            userId:userId,
-            description:description,
-            routeId:routeId    
-        })
-
-        newRoute.save(function(err, result){
-            try{
+         }
+         else{
+            var newFindings = new FindingsModel({
+                _id:mongoose.Types.ObjectId(),
+                location_id:location_id,
+                savedStatus:true,
+                userId:userId
+            })
+         }
+         try{
+            const savedFinding = await newFindings.save();
+            if(savedFinding){
                 res.json({
-                    message:"finding description of user saved for this userId :"+userId,
-                    data: result,
+                    message: "findings saved successfully",
+                    result:savedFinding,
+                    statusCode:201
                 })
             }
-            catch(err){
+            else{
                 res.json({
-                    message:"Error in saving findings for user",
-                    Error: err.message,
-                    error: err
+                    message: "findings could not saved successfully",
+                    result:savedFinding,
+                    statusCode:400
                 })
             }
-        })
-    }
-    else{
-        res.json({
-            message: "RouteId or userId may be null or undefined",
-        })
-    }
-
-    
+        }
+        catch(error){
+            res.json({
+                message: "error occurred while saving",
+                Error: error,
+                errorMessage:error.message,
+            })
+        }
+}
 }
 
 exports.deleteFindings = ( req,res) =>{
@@ -133,17 +188,17 @@ exports.updateFindings = (req,res)=>{
 
     const findingsId = req.body.findingsId ;
     const userId = req.body.userId;
-    const description = req.body.description;
-    const routeId= req.body.routeId;
+    const findings = req.body.findings;
+    const location_id= req.body.location_id;
 
 
     if(findingsId!==null && typeof findingsId !=="undefined"){
         
         FindingsModel.findOneAndUpdate ({_id: findingsId}, 
             {
+                location_id:location_id,
                 userId:userId,
-                description:description,
-                routeId:routeId  
+                findings:findings,
                 
             },
             {

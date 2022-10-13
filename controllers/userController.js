@@ -23,34 +23,23 @@ exports.createUser=(req,res)=>{
 exports.getAllUser=async (req,res)=>{
 
         const userDetails=await User.aggregate([
-          
-          {
-              $lookup:
-              {
-                  from: "savedroutes",
-                  localField: "_id",
-                  foreignField: "userId",
-                  as: "User saved routes"
-              }
-    
-          },
           {
             $lookup:
             {
                 from: "findings",
                 localField: "_id",
                 foreignField: "userId",
-                as: "All User findings about Routes"
+                as: "user_saved&finding_Locations"
             }
     
         },
         {
           $lookup:
           {
-              from: "parkedcars",
+              from: "userparkings",
               localField: "_id",
               foreignField: "userId",
-              as: "All Parkings of User"
+              as: "userParkings"
           }
     
       },
@@ -103,36 +92,37 @@ exports.getUser=async (req,res)=>{
 
           const userDetails=await User.aggregate([
             { $match: { _id:result._id} },
-            {
-                $lookup:
-                {
-                    from: "savedroutes",
-                    localField: "_id",
-                    foreignField: "userId",
-                    as: "User saved routes"
-                }
-      
-            },
+           
             {
               $lookup:
               {
                   from: "findings",
                   localField: "_id",
                   foreignField: "userId",
-                  as: "All User findings about Routes"
+                  as: "userFinding&saves_locations"
               }
       
           },
           {
             $lookup:
             {
-                from: "parkedcars",
+                from: "userparkings",
                 localField: "_id",
                 foreignField: "userId",
-                as: "All Parkings of User"
+                as: "user_parkings"
             }
       
         },
+        {
+          $lookup:
+          {
+              from: "user-reviews",
+              localField: "_id",
+              foreignField: "user_id",
+              as: "user-reviews"
+          }
+    
+      },
           
         ]);
       

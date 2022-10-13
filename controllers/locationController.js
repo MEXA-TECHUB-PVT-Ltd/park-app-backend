@@ -2,9 +2,6 @@
 const locationModel= require("../models/locationsModel")
 const mongoose  = require("mongoose");
 
-
-
-
 exports.getLocations = (req,res) =>{
 
     locationModel.find({}, (err , result)=>{
@@ -24,10 +21,57 @@ exports.getLocations = (req,res) =>{
 
     })
 }
+exports.getAllLocationsWithOnePic = (req,res) =>{
+
+    locationModel.find({}, {images:{$slice:1}} , (err , result)=>{
+        try{
+            res.json({
+                message: "All fetched locations are :",
+                data: result
+            })
+        }
+        catch(err){
+            res.json({
+                message: "Error in fetched location",
+                Error: err.message,
+                error: err
+            })
+        }
+
+    })
+}
 exports .getLocationByType = (req,res)=>{
     const type= req.query.type
 
-    locationModel.find({type:type} , function(err,result){
+    locationModel.find({type:type}, function(err,result){
+        try{
+            if(result){
+                res.json({
+                    message: "Locations with this types are fetched",
+                    statusCode: 200,
+                    result: result
+                })
+            }
+            else{
+                res.json({
+                    message: "could not fetched , record with this type may not exist",
+                    statusCode:404,
+                })
+            }
+        }
+        catch(err){
+            res.json({
+                message: "Error occurred while fetching location .",
+                Error:err,
+                errorMessage: err.message,
+            })
+        }
+    })
+}
+exports .getLocationByTypeWithOnePic = (req,res)=>{
+    const type= req.query.type
+
+    locationModel.find({type:type} , {images:{$slice:1}}, function(err,result){
         try{
             if(result){
                 res.json({

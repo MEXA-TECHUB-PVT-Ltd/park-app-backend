@@ -9,5 +9,9 @@ router.get ("/getAllFindings" , controller.getFindings);
 router.get ("/getFindingsByUserId/:userId", controller.getFindingsByUserId);
 router.delete("/deleteFindings/:findingsId", controller.deleteFindings);
 router.put ("/updateFindings" , controller.updateFindings);
+router.get ("/getAllSavedLocIfFindingsNotExist" , controller.getAllLocIfFindingsNotExist);
+router.get ("/getAllSavedLocIfFindingsNotExistByUserId/:userId" , controller.getAllLocIfFindingsNotExistByUserId);
+
+
 
 module.exports = router;
