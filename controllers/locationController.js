@@ -1,6 +1,8 @@
 
 const locationModel= require("../models/locationsModel")
 const mongoose  = require("mongoose");
+const cloudinary = require("../utils/cloudinary")
+
 
 exports.getLocations = (req,res) =>{
 
@@ -96,62 +98,81 @@ exports .getLocationByTypeWithOnePic = (req,res)=>{
         }
     })
 }
-exports.createLocations= (req,res) => {
+exports.createLocations=async (req,res) => {
 
     const type= req.body.type;
-    const images = req.body.images;
     const title = req.body.title;
     const description = req.body.description;
     const distance = req.body.distance;
     const avg_time = req.body.avg_time;
     const location = req.body.location;
+    console.log(type)
+    console.log(location)
 
+    console.log(req.files)
 
-    if(type!== null && typeof type !== "undefined"){
-
-        const newLocation= new locationModel({
-            _id:mongoose.Types.ObjectId(),
-             type: type,
-             images:images,
-             title:title,
-             description:description,
-             distance:distance,
-             avg_time:avg_time,
-             location:location,
-            
+        try{
+            var pathsArray = [];
     
-        })
-
-        newLocation.save(function(err, result){
-            try{
-                res.json({
-                    message:"location successfully saved",
-                    result:result,
-                    statusCode:201
+            for (const file of req.files){
+                const {path}= file
+                const c_result = await cloudinary.uploader.upload(path)
+                 pathsArray.push({
+                   image_url: c_result.secure_url,
+                    public_id:c_result.public_id
+                 })
+    
+            }
+            console.log(pathsArray)
+    
+                const newLocation= new locationModel({
+                    _id:mongoose.Types.ObjectId(),
+                     type: type,
+                     images:pathsArray,
+                     title:title,
+                     description:description,
+                     distance:distance,
+                     avg_time:avg_time,
+                     location:JSON.parse(location),
                 })
+                newLocation.save(function(err, result){
+                    console.log(result)
+                        res.json({
+                            message:"location successfully saveddd",
+                            result:result,
+                            statusCode:201
+                        })
+                })
+            
             }
             catch(err){
-                res.json({
-                    message:"Error in saving location ",
-                    Error: err.message,
-                    error: err
-                })
-            }
-        })
-    }
-    else{
-        res.json({
-            message: "type may be null or undefined",
-        })
-    }
-
+            res.json(err)
+        }
+ 
     
 }
 
-exports.deleteLocation = ( req,res) =>{
+
+exports.deleteLocation = async( req,res) =>{
 
     const location_id = req.params.location_id ;
+    try{
+        const result= await locationModel.findOne({_id:location_id});
+     if(result){
+        let imagesArray = result.images;
+        imagesArray.forEach(element => {
+            cloudinary.uploader.destroy(element.public_id)
+        });
+   }
+   else{
+    console.log("location with this id not found")
+   }
+    }
+    catch(err){
+        console.log(err)
+    }
     
+
     if(location_id !==null && typeof location_id !=="undefined"){
     locationModel.deleteOne({_id:location_id} , function(err , result){
         try{
@@ -181,22 +202,53 @@ exports.deleteLocation = ( req,res) =>{
 }
 
 
-exports.updateLocation = (req,res)=>{
+exports.updateLocation =async (req,res)=>{
 
     const location_id = req.body.location_id;
     const type= req.body.type;
-    const images = req.body.images;
     const title = req.body.title;
     const description = req.body.description;
     const distance = req.body.distance;
     const avg_time = req.body.avg_time;
+
+    if(req.files){
+        try{
+            const result= await locationModel.findOne({_id:location_id});
+         if(result){
+            let imagesArray = result.images;
+            imagesArray.forEach(element => {
+                cloudinary.uploader.destroy(element.public_id)
+            });
+       }
+       else{
+        console.log("location with this id not found")
+       }
+        }
+        catch(err){
+            console.log(err)
+        }
+       
+    }
+    
+
+    var pathsArray = [];
+    for (const file of req.files){
+        const {path}= file
+        const c_result = await cloudinary.uploader.upload(path)
+         pathsArray.push({
+           image_url: c_result.secure_url,
+            public_id:c_result.public_id
+         })
+
+    }
+    console.log(pathsArray)
     
 
     if(location_id){
         locationModel.findOneAndUpdate ({_id: location_id}, 
             {
                 type: type,
-                images:images,
+                images:pathsArray,
                 title:title,
                 description:description,
                 distance:distance,

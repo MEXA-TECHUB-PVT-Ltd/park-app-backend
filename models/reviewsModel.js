@@ -14,7 +14,7 @@ const reviewsSchema = new mongoose.Schema({
             
         name: String,
         review:String,
-        picture: String,
+        picture:Object,
 
             
 })

@@ -3,10 +3,11 @@ const express = require("express"),
 router=express.Router();
 
 const controller = require("../controllers/reviewController")
+const upload = require("../middlewares/multer")
 
-router.post ("/createReview" ,controller.createReview);
+router.post ("/createReview",upload.single("picture") ,controller.createReview);
 router.get ("/getAllReviews" , controller.getAllReviews);
 router.get ("/getReviewsByUserId/:user_id" , controller.getReviewsByUserId);
 router.delete("/deleteReview/:review_id", controller.deleteReview);
-router.put ("/updateReview" , controller.updateReview);
+router.put ("/updateReview" ,upload.single("picture"), controller.updateReview);
 module.exports = router;

@@ -16,7 +16,8 @@ _id:mongoose.Schema.Types.ObjectId,
    required: [true, "Coordinates are required"] 
  } 
 },
-images:[String],
+images:[Object],
+
 title:String,
 description:String,
 distance:Number,

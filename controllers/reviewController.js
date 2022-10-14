@@ -1,7 +1,7 @@
 
 const mongoose = require ( "mongoose")
 const reviewsModel = require ("../models/reviewsModel")
-
+const cloudinary = require("../utils/cloudinary")
 
 exports.getAllReviews = async (req,res)=>{
 try{
@@ -55,12 +55,30 @@ exports.getReviewsByUserId =async (req,res)=>{
     } 
 }
 
-exports.createReview = (req,res)=>{
+exports.createReview =async (req,res)=>{
     const user_id = req.body.user_id;
     const location_id = req.body.location_id;
     const name = req.body.name;
     const review = req.body.review;
-    const picture = req.body.picture;
+    console.log(req.file)
+    let userPic;
+        try{
+            if(req.file){
+                console.log(req.file)
+                const c_result = await cloudinary.uploader.upload(req.file.path)
+               console.log(c_result.secure_url)
+               userPic= {
+                userPicUrl:c_result.secure_url,
+                public_id:c_result.public_id
+               };
+            }
+            else{
+                userPic= {}
+            }
+            
+        }catch(err)
+        {console.log(err)}
+            
 
     const newReview = new reviewsModel({
         _id:mongoose.Types.ObjectId(),
@@ -68,7 +86,7 @@ exports.createReview = (req,res)=>{
         location_id: location_id,
         name: name,
         review: review,
-        picture: picture
+        picture: userPic
     })
 
     newReview.save(function(err,result){
@@ -98,8 +116,18 @@ exports.createReview = (req,res)=>{
 
 }
 
-exports.deleteReview = (req,res)=>{
+exports.deleteReview = async (req,res)=>{
     const review_id = req.params .review_id;
+    try{
+        const result= await reviewsModel.findOne({_id: review_id});
+        if(result){
+            await cloudinary.uploader.destroy(result.picture.public_id)
+        }else{
+            console.log("not found this review ")
+        }
+    }
+    catch(err){console.log(err)}
+    
 
     reviewsModel.deleteOne({_id: review_id} , function(err,result){
         try{
@@ -127,13 +155,48 @@ exports.deleteReview = (req,res)=>{
     })
 }
 
-exports.updateReview = (req,res)=>{
+exports.updateReview = async (req,res)=>{
     const review_id = req.body.review_id;
     const user_id = req.body.user_id;
     const location_id = req.body.location_id;
     const name = req.body.name;
     const review = req.body.review;
-    const picture = req.body.picture;
+
+    console.log(review_id)
+    //---------------------------------
+    //deleting previous picture from cloudinary
+    try{
+        const result= await reviewsModel.findOne({_id: review_id});
+        if(result){
+            await cloudinary.uploader.destroy(result.picture.public_id)
+        }else{
+            console.log("not found this review ")
+        }
+    }
+    catch(err){console.log(err)}
+    //----------------------------------------------
+
+    // uploading new picture in to cloudinary
+    let userPic;
+    try{
+        if(req.file){
+            console.log(req.file)
+            const c_result = await cloudinary.uploader.upload(req.file.path)
+           console.log(c_result.secure_url)
+           userPic= {
+            userPicUrl:c_result.secure_url,
+            public_id:c_result.public_id
+           };
+        }
+        else{
+            userPic= {}
+        }
+        
+    }catch(err)
+    {console.log(err)}
+
+
+
 
     reviewsModel.findOneAndUpdate({_id: review_id},
         {
@@ -141,7 +204,7 @@ exports.updateReview = (req,res)=>{
         location_id: location_id,
         name: name,
         review: review,
-        picture: picture
+        picture: userPic
             
         },
         {
