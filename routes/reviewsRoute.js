@@ -10,4 +10,6 @@ router.get ("/getAllReviews" , controller.getAllReviews);
 router.get ("/getReviewsByUserId/:user_id" , controller.getReviewsByUserId);
 router.delete("/deleteReview/:review_id", controller.deleteReview);
 router.put ("/updateReview" ,upload.single("picture"), controller.updateReview);
+router.get ("/getReviewsByLocation",controller.getReviewsByLocation);
+
 module.exports = router;

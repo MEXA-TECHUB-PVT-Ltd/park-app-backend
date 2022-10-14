@@ -230,3 +230,34 @@ exports.updateFindings = (req,res)=>{
         res.json("findingsId  may be null or undefined")
        }
 }
+
+exports.getFindingsByLocId_userId = async (req,res)=>{
+    const userId= req.query.userId;
+    const location_id= req.query.location_id;
+
+    try{
+        const result =await FindingsModel.findOne({userId:userId , location_id:location_id})
+        if(result){
+            res.json({
+                message: "Finding of user for this location is:",
+                result:result
+            })
+        }
+        else{
+            res.json({
+                message: "could not get findings for this route",
+                result:result
+            })
+        }
+    }
+    catch(err){
+        res.json({
+            message: "Error occurred while getting user findings for this location",
+            Error:err,
+            errorMessage: err.message
+        })
+    }
+    
+
+
+}

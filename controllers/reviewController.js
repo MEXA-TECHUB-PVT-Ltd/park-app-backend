@@ -237,3 +237,33 @@ exports.updateReview = async (req,res)=>{
         })
     
 }
+
+exports.getReviewsByLocation= async (req,res)=>{
+    const location_id= req.query.location_id;
+    try{
+        const result= await reviewsModel.find({location_id:location_id})
+
+        if(result){
+            res.json({
+                message:"All reviews about this location:",
+                result:result,
+                statusCode:200
+            })
+        }
+        else{
+            res.json({
+                message:"could not found reviews about this location , location with this id may not exist:",
+                result:result,
+                statusCode:400
+            })
+        }
+    }
+    catch(error){
+        res.json({
+            message: "Error occurred while fetching reviews",
+            Error:error.message
+        })
+    }
+    
+
+}
