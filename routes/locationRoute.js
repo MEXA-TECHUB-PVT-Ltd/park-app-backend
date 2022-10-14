@@ -13,6 +13,8 @@ router.put ("/updateLocation" ,upload.array("images") , controller.updateLocatio
 router.get("/getLocationByType" , controller.getLocationByType)
 router.get("/getLocationByTypeWithOnePic" , controller.getLocationByTypeWithOnePic)
 router.get("/getAllLocationWithOnePic" , controller.getAllLocationsWithOnePic)
+router.get("/getLocationById/:location_id" , controller.getLocationById)
+
 
 
 

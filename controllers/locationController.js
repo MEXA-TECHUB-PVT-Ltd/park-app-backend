@@ -98,6 +98,25 @@ exports .getLocationByTypeWithOnePic = (req,res)=>{
         }
     })
 }
+exports.getLocationById = (req,res)=>{
+    const location_id = req.params .location_id;
+    locationModel.findOne({_id:location_id}, (err , result)=>{
+        try{
+            res.json({
+                message: "location fetched:",
+                data: result
+            })
+        }
+        catch(err){
+            res.json({
+                message: "Error in fetched location",
+                Error: err.message,
+                error: err
+            })
+        }
+
+    })
+}
 exports.createLocations=async (req,res) => {
 
     const type= req.body.type;
