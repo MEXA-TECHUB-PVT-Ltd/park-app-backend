@@ -178,7 +178,7 @@ exports.deleteLocation = async( req,res) =>{
     try{
         const result= await locationModel.findOne({_id:location_id});
      if(result){
-        let imagesArray = result.images;
+        let imagesArray = result.postImages;
         imagesArray.forEach(element => {
             cloudinary.uploader.destroy(element.public_id)
         });
@@ -234,7 +234,7 @@ exports.updateLocation =async (req,res)=>{
         try{
             const result= await locationModel.findOne({_id:location_id});
          if(result){
-            let imagesArray = result.images;
+            let imagesArray = result.postImages;
             imagesArray.forEach(element => {
                 cloudinary.uploader.destroy(element.public_id)
             });

@@ -20,7 +20,7 @@ images:[Object],
 
 title:String,
 description:String,
-distance:Number,
-avg_time:Number,
+distance:String,
+avg_time:String,
 })
 module.exports = mongoose.model("location", locationsSchema);
