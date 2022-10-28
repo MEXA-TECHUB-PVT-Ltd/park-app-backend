@@ -8,9 +8,9 @@ const findingsSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "location"
    },
+   findingStatus:Boolean,
    savedStatus:Boolean,
 });
 
 const findingModel = mongoose.model("finding", findingsSchema);
-
 module.exports = findingModel;

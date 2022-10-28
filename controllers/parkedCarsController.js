@@ -50,11 +50,11 @@ exports.getParkedCarsByUserId= (req,res) =>{
     const userId = req.params.userId
 
     if(userId !==null && typeof userId !=="undefined" ){
-        parkedCarsModel.find({userId:userId}).populate("parking_id").
+        parkedCarsModel.findOne({userId:userId , isParked:true}).populate("parking_id").
         exec(function(err, result){
             try{
                 res.json({
-                    message: "All fetched parked Cars are:",
+                    message: "parking of this user is:",
                     data: result
                 })
             }
@@ -75,7 +75,7 @@ exports.getParkedCarsByUserId= (req,res) =>{
 }
 
 
-exports.parkCar= (req,res) => {
+exports.parkCar= async(req,res) => {
 
     const parkTime = req.body.parkTime;
     const plateNumber = req.body.plateNumber;
@@ -87,47 +87,53 @@ exports.parkCar= (req,res) => {
     const unParkTime = req.body.unParkTime;
     const carColor = req.body.carColor;
 
-    
 
-    if(parking_id){
-        const park= new parkedCarsModel({
-            _id:mongoose.Types.ObjectId(),
-            userId:userId,
-            parking_details:parkingDetails,
-            parking_id:parking_id,
-            parkTime:parkTime,
-            lane_number:lane_number,
-            totalParkingTime:totalParkingTime,
-            carColor:carColor,
-            unParkTime:unParkTime,
-            plateNumber:plateNumber,
-    
-        })
-
-        park.save(function(err, result){
-           
-            try{
-                res.json({
-                    message:"vehicle parking successfully saved",
-                    data: result,
-                })
-            }
-            catch(err){
-                res.json({
-                    message:"Error in saving vehicle Parking",
-                    Error: err.message,
-                    error: err
-                })
-            }
-        })
-    }
-    else{
+    const isParked = await parkedCarsModel.findOne({userId: userId , isParked:true}).populate("parking_id")
+    if(isParked){
         res.json({
-            message: "parking id my be null or undefined",
+            message: "User has already parked its vehicle , to add new parking please unpark previous vehicle first",
+            parkingDetails:isParked,
+            success:false
         })
     }
+    else{   
+        if(parking_id){
+            const park= new parkedCarsModel({
+                _id:mongoose.Types.ObjectId(),
+                userId:userId,
+                parking_details:parkingDetails,
+                parking_id:parking_id,
+                parkTime:parkTime,
+                lane_number:lane_number,
+                totalParkingTime:totalParkingTime,
+                carColor:carColor,
+                unParkTime:unParkTime,
+                plateNumber:plateNumber,
+            })
+            park.save(function(err, result){
+               
+                try{
+                    res.json({
+                        message:"vehicle parking successfully saved",
+                        data: result,
+                    })
+                }
+                catch(err){
+                    res.json({
+                        message:"Error in saving vehicle Parking",
+                        Error: err.message,
+                        error: err
+                    })
+                }
+            })
+        }
+        else{
+            res.json({
+                message: "parking id my be null or undefined",
+            })
+        }
 
-    
+    }
 }
 
 exports.deleteParkings = ( req,res) =>{

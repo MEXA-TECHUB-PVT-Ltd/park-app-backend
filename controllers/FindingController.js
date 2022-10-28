@@ -103,6 +103,12 @@ exports.addFindings= async (req,res) => {
     const userId = req.body.userId;
     const findings = req.body.findings;
     const location_id= req.body.location_id;
+    var findingStatus ;
+
+
+    if (findings){
+        findingStatus=true;
+    }
     
     if(location_id && userId) {
 
@@ -112,7 +118,8 @@ exports.addFindings= async (req,res) => {
                 location_id:location_id,
                 userId:userId,
                 findings:findings,
-                savedStatus:true
+                savedStatus:true,
+                findingStatus:findingStatus
             })
 
          }
@@ -121,7 +128,8 @@ exports.addFindings= async (req,res) => {
                 _id:mongoose.Types.ObjectId(),
                 location_id:location_id,
                 savedStatus:true,
-                userId:userId
+                userId:userId,
+                findingStatus:false
             })
          }
          try{
