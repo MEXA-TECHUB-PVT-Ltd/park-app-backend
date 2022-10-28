@@ -53,10 +53,19 @@ exports.getParkedCarsByUserId= (req,res) =>{
         parkedCarsModel.findOne({userId:userId , isParked:true}).populate("parking_id").
         exec(function(err, result){
             try{
-                res.json({
-                    message: "parking of this user is:",
-                    data: result
-                })
+                if(result){
+                    res.json({
+                        message: "parking of this user is:",
+                        data: result
+                    })
+                }
+                else{
+                    res.json({
+                        message: "Not found any current parking for this user",
+                        success:false
+                    })
+                }
+                
             }
             catch(err){
                 res.json({
